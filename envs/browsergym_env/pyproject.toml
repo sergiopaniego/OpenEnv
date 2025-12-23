@@ -34,7 +34,9 @@ server = "browsergym_env.server.app:main"
 
 [tool.setuptools]
 packages = ["browsergym_env", "browsergym_env.server"]
-package-dir = { "browsergym_env" = ".", "browsergym_env.server" = "server" }
+
+[tool.setuptools.package-dir]
+"browsergym_env" = "."
 
 [tool.setuptools.package-data]
 browsergym_env = ["**/*.yaml", "**/*.yml", "**/*.md"]
