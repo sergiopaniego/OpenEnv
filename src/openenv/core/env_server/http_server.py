@@ -332,26 +332,15 @@ class HTTPEnvServer:
             executor = self._session_executors.pop(session_id, None)
             self._session_info.pop(session_id, None)
 
-        # Run close() in the same executor where the env was created
-        # This is required for thread-sensitive libraries like Playwright/greenlet
-        if env is not None:
-            if executor is not None:
-                try:
-                    loop = asyncio.get_event_loop()
-                    await loop.run_in_executor(executor, env.close)
-                except Exception:
-                    # If executor close fails, try direct close as fallback
-                    try:
-                        env.close()
-                    except Exception:
-                        pass  # Best effort cleanup
-            else:
-                try:
-                    env.close()
-                except Exception:
-                    pass  # Best effort cleanup
+        # Close env in the same executor thread where it was created
+        # (required for thread-sensitive libraries like Playwright/greenlet)
+        if env is not None and executor is not None:
+            try:
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(executor, env.close)
+            except Exception:
+                pass  # Best effort cleanup
 
-        # Shutdown executor after close is done
         if executor is not None:
             executor.shutdown(wait=False)
 
